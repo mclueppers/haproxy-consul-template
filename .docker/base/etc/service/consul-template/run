@@ -1,0 +1,5 @@
+#!/bin/sh
+
+exec /usr/local/bin/consul-template \
+  -consul-addr=$CONSUL_ADDR \
+  -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:sv restart haproxy"

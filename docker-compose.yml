@@ -1,0 +1,142 @@
+version: '3.4'
+
+services:
+  consul:
+    image: consul:latest
+    command: agent -dev -ui -client=0.0.0.0
+    ports:
+      - "8500:8500"
+
+  registrator:
+    image: gliderlabs/registrator:latest
+    command: -cleanup=true -internal -retry-attempts=-1 -retry-interval=2000 -ttl=90 -ttl-refresh=30 consul://consul:8500
+    depends_on:
+      - consul
+    links:
+      - consul
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock"
+
+
+  haproxy-production-blue:
+    build: .
+    image: haproxy-consul-template:production
+    environment:
+      CONSUL_ADDR: 'consul:8500'
+      SERVICE_80_NAME: haproxy
+      SERVICE_80_TAGS: 'production,blue'
+      BK_SERVICE_ENV: production
+      BK_SERVICE_NAME: hello-world
+    depends_on:
+      - consul
+    ports:
+      - "80"
+      - "8080"
+    links:
+      - consul
+
+  haproxy-production-green:
+    image: haproxy-consul-template:production
+    environment:
+      CONSUL_ADDR: 'consul:8500'
+      SERVICE_NAME: 'haproxy'
+      SERVICE_80_TAGS: 'production,green'
+      BK_SERVICE_ENV: production
+      BK_SERVICE_NAME: hello-world
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  haproxy-staging:
+    image: haproxy-consul-template:production
+    environment:
+      CONSUL_ADDR: 'consul:8500'
+      SERVICE_NAME: 'haproxy'
+      SERVICE_80_TAGS: 'staging,green'
+      BK_SERVICE_ENV: staging
+      BK_SERVICE_NAME: hello-world
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  hello-world-prod-blue-a:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'production,blue,a'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  hello-world-prod-blue-b:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'production,blue,b'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  hello-world-prod-green-a:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'production,green,a'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  hello-world-prod-green-b:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'production,green,b'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+
+  hello-world-staging-blue:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'staging,blue,a'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+
+  hello-world-staging-green:
+    image: tutum/hello-world:latest
+    environment:
+      SERVICE_80_NAME: 'hello-world'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
+      SERVICE_80_TAGS: 'staging,green'
+    depends_on:
+      - consul
+    links:
+      - consul

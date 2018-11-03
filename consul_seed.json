@@ -1,0 +1,112 @@
+[
+	{
+		"key": "service/haproxy/production/colors/active",
+		"flags": 0,
+		"value": "Ymx1ZQ=="
+	},
+	{
+		"key": "service/haproxy/production/colors/inactive",
+		"flags": 0,
+		"value": "Z3JlZW4="
+	},
+	{
+		"key": "service/haproxy/production/maxconn",
+		"flags": 0,
+		"value": "MTI1MDA="
+	},
+	{
+		"key": "service/haproxy/production/mode",
+		"flags": 0,
+		"value": "aHR0cA=="
+	},
+	{
+		"key": "service/haproxy/production/timeouts/client",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
+		"key": "service/haproxy/production/timeouts/connect",
+		"flags": 0,
+		"value": "MnM="
+	},
+	{
+		"key": "service/haproxy/production/timeouts/server",
+		"flags": 0,
+		"value": "MTVz"
+	},
+	{
+		"key": "service/haproxy/production/weights/active/a",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/production/weights/active/b",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/production/weights/inactive/a",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/production/weights/inactive/b",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/staging/colors/active",
+		"flags": 0,
+		"value": "Ymx1ZQ=="
+	},
+	{
+		"key": "service/haproxy/staging/colors/inactive",
+		"flags": 0,
+		"value": "Z3JlZW4="
+	},
+	{
+		"key": "service/haproxy/staging/maxconn",
+		"flags": 0,
+		"value": "MTI1MDA="
+	},
+	{
+		"key": "service/haproxy/staging/mode",
+		"flags": 0,
+		"value": "aHR0cA=="
+	},
+	{
+		"key": "service/haproxy/staging/timeouts/client",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
+		"key": "service/haproxy/staging/timeouts/connect",
+		"flags": 0,
+		"value": "MnM="
+	},
+	{
+		"key": "service/haproxy/staging/timeouts/server",
+		"flags": 0,
+		"value": "MTVz"
+	},
+	{
+		"key": "service/haproxy/staging/weights/active/a",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/staging/weights/active/b",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/staging/weights/inactive/a",
+		"flags": 0,
+		"value": "MTAw"
+	},
+	{
+		"key": "service/haproxy/staging/weights/inactive/b",
+		"flags": 0,
+		"value": "MTAw"
+	}
+]
