@@ -7,3 +7,4 @@ init:
 				--scale hello-world-prod-green=2 \
 				--scale haproxy-production-blue=2
 	@sudo docker-compose exec consul consul kv import "`cat consul_seed.json`"
+	@sudo docker-compose port haproxy-production-blue 80

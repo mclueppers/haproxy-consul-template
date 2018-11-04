@@ -1,5 +1,8 @@
 #!/bin/sh
+export SERVICE_1275_NAME=${SERVICE_1275_NAME:-"${SERVICE_80_NAME}-peers"}
 
 exec /usr/local/bin/consul-template \
   -consul-addr=$CONSUL_ADDR \
-  -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:sv restart haproxy"
+  -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:/sbin/boot_haproxy.sh" \
+  -wait=3s:11s \
+  -dedup

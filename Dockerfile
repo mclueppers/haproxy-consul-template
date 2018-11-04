@@ -30,7 +30,7 @@ RUN apk --no-cache --update add $DEPS \
     && rm -rf /tmp/consul-template_0.19.5_linux_amd64.zip \
     && apk del curl wget unzip
 
-EXPOSE 80 8080
+EXPOSE 80 8080 1275
 
 COPY ./.docker/base /
 

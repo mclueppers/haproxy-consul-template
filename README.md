@@ -23,8 +23,15 @@ few environment variables:
 | SERVICE_PATH | /service/SERVICE_NAME/SERVICE_ENV | The path to the configuration of the load-balancer inside Consul |
 | BK_SERVICE_NAME | hello-world | The name of the backend service as found in Consul that this load-balancer exposes |
 | BK_SERVICE_ENV | production | Environment where BK_SERVICE_NAME runs |
+| BK_SERVICE_CHECK | / | HAproxy will send regular HEAD requests to this destination |
 
 The solution allows horizontal scaling thanks to dynamic peers configuration inside HAproxy. It is nevertheless recommended to run at least 2 instances for resiliency. Hence SERVICE_NAME and SERVICE_ENV are important for discovering other peers.
+
+## Requirements
+
+* Consul server
+* Registrator (optional)
+* docker-compose for running the provided example (optional)
 
 ## Example
 

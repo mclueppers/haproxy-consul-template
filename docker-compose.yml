@@ -24,7 +24,8 @@ services:
     environment:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_80_NAME: haproxy
-      SERVICE_80_TAGS: 'production,blue'
+      SERVICE_1275_NAME: 'haproxy-peers'
+      SERVICE_TAGS: 'production,blue'
       BK_SERVICE_ENV: production
       BK_SERVICE_NAME: hello-world
     depends_on:
@@ -62,7 +63,7 @@ services:
       - consul
 
   hello-world-prod-blue-a:
-    image: tutum/hello-world:latest
+    image: tutum/hello-world-sessions:latest
     environment:
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
@@ -75,7 +76,7 @@ services:
       - consul
 
   hello-world-prod-blue-b:
-    image: tutum/hello-world:latest
+    image: tutum/hello-world-sessions:latest
     environment:
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
