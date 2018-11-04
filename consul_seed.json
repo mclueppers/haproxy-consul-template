@@ -37,7 +37,7 @@
 	{
 		"key": "service/haproxy/production/session_cookie_id",
 		"flags": 0,
-		"value": "U0VSVkVSSUQ="
+		"value": "U1JWSUQ="
 	},
 	{
 		"key": "service/haproxy/production/timeouts/client",
@@ -57,22 +57,22 @@
 	{
 		"key": "service/haproxy/production/weights/active/a",
 		"flags": 0,
-		"value": "MTAw"
+		"value": "ODA="
 	},
 	{
 		"key": "service/haproxy/production/weights/active/b",
 		"flags": 0,
-		"value": "MTAw"
+		"value": "MjA="
 	},
 	{
 		"key": "service/haproxy/production/weights/inactive/a",
 		"flags": 0,
-		"value": "MTAw"
+		"value": "MjA="
 	},
 	{
 		"key": "service/haproxy/production/weights/inactive/b",
 		"flags": 0,
-		"value": "MTAw"
+		"value": "ODA="
 	},
 	{
 		"key": "service/haproxy/staging/checks/fall",
@@ -100,11 +100,6 @@
 		"value": "Z3JlZW4="
 	},
 	{
-		"key": "service/haproxy/staging/session_cookie_id",
-		"flags": 0,
-		"value": "U0VSVkVSSUQ="
-	},
-	{
 		"key": "service/haproxy/staging/maxconn",
 		"flags": 0,
 		"value": "MTI1MDA="
@@ -113,6 +108,11 @@
 		"key": "service/haproxy/staging/mode",
 		"flags": 0,
 		"value": "aHR0cA=="
+	},
+	{
+		"key": "service/haproxy/staging/session_cookie_id",
+		"flags": 0,
+		"value": "U0VSVkVSSUQ="
 	},
 	{
 		"key": "service/haproxy/staging/timeouts/client",
