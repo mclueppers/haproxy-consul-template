@@ -36,3 +36,11 @@ The solution allows horizontal scaling thanks to dynamic peers configuration ins
 ## Example
 
 Look at the provided docker-compose.yml for an example that covers the full potential of the load-balancer.
+
+## Running the demo
+
+```
+make build
+make init
+```
+and then visit the LB at ```localhost:32678```. Replace the port with the one listed at the end of the ```make init``` run.

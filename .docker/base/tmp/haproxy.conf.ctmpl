@@ -5,7 +5,7 @@
 {{ $inactive_slice    := (printf "%s/colors/inactive" $service_path | key)}}
 {{ $bk_service        := (printf "%s" (or (env "BK_SERVICE_NAME") "hello-world"))}}
 {{ $bk_service_env    := (printf "%s" (or (env "BK_SERVICE_ENV") "production"))}}
-{{ $bk_service_check  := (printf "%s" (or (env "BK_SERVICE_CHECK") "/"))}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ haproxy-healthcheck.invalid" $bk_service_check)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
+{{ $bk_service_check  := (printf "%s" (or (env "BK_SERVICE_CHECK") "/"))}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.haproxy-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
 {{ $active_a_weight   := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
 {{ $active_b_weight   := (keyOrDefault (printf "%s/weights/active/b" $service_path) "100")}}
 {{ $inactive_a_weight := (keyOrDefault (printf "%s/weights/inactive/a" $service_path) "100")}}
@@ -58,6 +58,7 @@ backend bk-http-in-active
     stick-table type string len 32 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
+    rspidel (Server|X-Powered-By)
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
@@ -79,6 +80,7 @@ backend bk-http-in-inactive
     stick-table type string len 32 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
+    rspidel (Server|X-Powered-By)
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}

@@ -63,8 +63,14 @@ services:
       - consul
 
   hello-world-prod-blue-a:
-    image: tutum/hello-world-sessions:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile.hello-world
+      args:
+        - 'PHP_VERSION=7.2'
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-prod-blue-a'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
@@ -76,8 +82,9 @@ services:
       - consul
 
   hello-world-prod-blue-b:
-    image: tutum/hello-world-sessions:latest
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-prod-blue-b'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
@@ -89,8 +96,9 @@ services:
       - consul
 
   hello-world-prod-green-a:
-    image: tutum/hello-world:latest
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-prod-green-a'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
@@ -102,8 +110,9 @@ services:
       - consul
 
   hello-world-prod-green-b:
-    image: tutum/hello-world:latest
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-prod-green-b'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
@@ -116,8 +125,9 @@ services:
 
 
   hello-world-staging-blue:
-    image: tutum/hello-world:latest
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-staging-blue'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
@@ -130,8 +140,9 @@ services:
 
 
   hello-world-staging-green:
-    image: tutum/hello-world:latest
+    image: opsgang/docker-hello-world-bgab:latest
     environment:
+      SERVICE_NAME: 'hello-world-staging-green'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
