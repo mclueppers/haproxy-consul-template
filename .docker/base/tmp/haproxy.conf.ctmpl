@@ -11,7 +11,7 @@
 {{ $inactive_a_weight := (keyOrDefault (printf "%s/weights/inactive/a" $service_path) "100")}}
 {{ $inactive_b_weight := (keyOrDefault (printf "%s/weights/inactive/b" $service_path) "100")}}
 {{ $session_cookie_id := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
-{{ $peers_added       := "false"}}
+{{ $stats_credentials := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 global
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2500"}}
 
@@ -52,6 +52,21 @@ frontend ft-http-in-inactive-b
     bind 127.0.0.1:8003
     default_backend bk-http-in-inactive-b
 
+listen stats
+    bind *:1936
+    mode http
+    log  global
+
+    maxconn 10{{range ls (printf "%s/timeouts" $service_path)}}
+    timeout {{.Key}} {{.Value}}{{end}}
+
+    stats enable
+    stats hide-version
+    stats refresh 30s
+    stats show-node
+    stats auth {{printf "%s" $stats_credentials}}
+    stats uri  /haproxy?stats
+
 # Define the backends
 backend bk-http-in-active
     cookie {{printf "%s" $session_cookie_id}} insert indirect nocache
@@ -66,13 +81,21 @@ backend bk-http-in-active
     server Active-b 127.0.0.1:8002 weight {{printf "%s" $active_b_weight}} check cookie ab
 
 backend bk-http-in-active-a
-    balance roundrobin{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}}{{end}}{{else}}
+    balance roundrobin
+    retries 10
+    option redispatch
+    option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
     server bad_gateway_active_a 127.0.0.1:3000{{end}}
 
 backend bk-http-in-active-b
-    balance roundrobin{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}}{{end}}{{else}}
+    balance roundrobin
+    retries 10
+    option redispatch
+    option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
     server bad_gateway_active_b 127.0.0.1:3000{{end}}
 
 backend bk-http-in-inactive
@@ -88,11 +111,19 @@ backend bk-http-in-inactive
     server Inctive-b 127.0.0.1:8003 weight {{printf "%s" $inactive_b_weight}} check cookie ib
 
 backend bk-http-in-inactive-a
-    balance roundrobin{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}}{{end}}{{else}}
+    balance roundrobin
+    retries 10
+    option redispatch
+    option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
     server bad_gateway_inactive_a 127.0.0.1:3000{{end}}
 
 backend bk-http-in-inactive-b
-    balance roundrobin{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}}{{end}}{{else}}
+    balance roundrobin
+    retries 10
+    option redispatch
+    option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
     server bad_gateway_inactive_b 127.0.0.1:3000{{end}}
