@@ -70,7 +70,7 @@ listen stats
 # Define the backends
 backend bk-http-in-active
     cookie {{printf "%s" $session_cookie_id}} insert indirect nocache
-    stick-table type string len 32 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
+    stick-table type string len 2 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
@@ -100,7 +100,7 @@ backend bk-http-in-active-b
 
 backend bk-http-in-inactive
     cookie {{printf "%s" $session_cookie_id}} insert indirect nocache
-    stick-table type string len 32 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
+    stick-table type string len 2 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
