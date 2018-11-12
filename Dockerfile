@@ -22,12 +22,12 @@ ENV DEPS="curl \
         runit"
 
 RUN apk --no-cache --update add $DEPS \
-    && wget -O /tmp/consul-template_0.19.5_linux_amd64.zip \
+    && wget -O /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
          https://releases.hashicorp.com/consul-template/${CONSUL_TEMPlATE_VERSION}/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
     && echo "$CONSUL_TEMPlATE_SHA256SUMS  /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip" | sha256sum -c - \
-    && unzip /tmp/consul-template_0.19.5_linux_amd64.zip \
+    && unzip /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
     && mv consul-template /usr/local/bin/ \
-    && rm -rf /tmp/consul-template_0.19.5_linux_amd64.zip \
+    && rm -rf /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
     && apk del curl wget unzip
 
 EXPOSE 80 8080 1275 1936
