@@ -54,6 +54,7 @@ services:
     environment:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_NAME: 'haproxy'
+      SERVICE_ENV: 'staging'
       SERVICE_80_TAGS: 'staging,green'
       BK_SERVICE_ENV: staging
       BK_SERVICE_NAME: hello-world
@@ -124,7 +125,7 @@ services:
       - consul
 
 
-  hello-world-staging-blue:
+  hello-world-staging-blue-b:
     image: opsgang/docker-hello-world-bgab:latest
     environment:
       SERVICE_NAME: 'hello-world-staging-blue-b'
@@ -139,7 +140,7 @@ services:
       - consul
 
 
-  hello-world-staging-green:
+  hello-world-staging-green-a:
     image: opsgang/docker-hello-world-bgab:latest
     environment:
       SERVICE_NAME: 'hello-world-staging-green-a'
