@@ -127,12 +127,12 @@ services:
   hello-world-staging-blue:
     image: opsgang/docker-hello-world-bgab:latest
     environment:
-      SERVICE_NAME: 'hello-world-staging-blue'
+      SERVICE_NAME: 'hello-world-staging-blue-b'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
       SERVICE_80_CHECK_TIMEOUT: 2s
-      SERVICE_80_TAGS: 'staging,blue,a'
+      SERVICE_80_TAGS: 'staging,blue,b'
     depends_on:
       - consul
     links:
@@ -142,12 +142,12 @@ services:
   hello-world-staging-green:
     image: opsgang/docker-hello-world-bgab:latest
     environment:
-      SERVICE_NAME: 'hello-world-staging-green'
+      SERVICE_NAME: 'hello-world-staging-green-a'
       SERVICE_80_NAME: 'hello-world'
       SERVICE_80_CHECK_HTTP: /
       SERVICE_80_CHECK_INTERVAL: 10s
       SERVICE_80_CHECK_TIMEOUT: 2s
-      SERVICE_80_TAGS: 'staging,green'
+      SERVICE_80_TAGS: 'staging,green,a'
     depends_on:
       - consul
     links:
