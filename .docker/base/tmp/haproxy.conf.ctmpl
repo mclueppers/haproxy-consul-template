@@ -13,6 +13,7 @@
 {{ $session_cookie_id := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
 {{ $stats_credentials := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 global
+    nbproc  {{or (env "NBPROC") "1"}}
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2500"}}
 
 defaults
