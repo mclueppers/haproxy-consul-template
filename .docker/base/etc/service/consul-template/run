@@ -6,7 +6,6 @@
 #
 
 export SERVICE_1275_NAME=${SERVICE_1275_NAME:-"${SERVICE_80_NAME}-peers"}
-export NBPROC=`nproc -n`
 
 # Test if Consul address has been set and if not assume we run in ECS so try to
 # get the IP of the host system

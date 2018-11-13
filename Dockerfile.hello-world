@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.8
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -40,7 +40,7 @@ ENV \
 ADD https://repos.dobrev.it/alpine/dobrevit.rsa.pub /etc/apk/keys/dobrevit.rsa.pub
 
 RUN set -x \
-    && echo "http://repos.dobrev.it/alpine/v3.7" >> /etc/apk/repositories \
+    && echo "http://repos.dobrev.it/alpine/v3.8" >> /etc/apk/repositories \
     && apk add --no-cache $DEPS $PHP_DEPS \
     && sed -i \
         -e "s/\/var\/www\/localhost\/htdocs/\/var\/www\/html/g" \
