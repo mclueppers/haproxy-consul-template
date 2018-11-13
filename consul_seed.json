@@ -40,6 +40,11 @@
 		"value": "U1JWSUQ="
 	},
 	{
+		"key": "service/haproxy/production/stats_credentials",
+		"flags": 0,
+		"value": "YWRtaW46cGFzc3dvcmQ="
+	},
+	{
 		"key": "service/haproxy/production/timeouts/client",
 		"flags": 0,
 		"value": "MzBz"
