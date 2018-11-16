@@ -25,7 +25,7 @@ stress-test-aa:
 	@ab -n 100000 -c 300 -v 1 -C SRVID=aa -i http://`docker-compose port --protocol=tcp --index=1 haproxy-production-blue 80`/
 
 stress-test:
-	@ab -n 100000 -c 300 -v 1 -i http://`docker-compose port --protocol=tcp --index=1 haproxy-production-blue 80`/
+	@ab -n 100000 -c 100 -v 1 -i http://`docker-compose port --protocol=tcp --index=1 haproxy-production-blue 80`/
 
 stress-test-inactive:
-	@ab -n 100000 -c 300 -v 1 -i http://`docker-compose port --protocol=tcp --index=1 haproxy-production-blue 8080`/
+	@ab -n 100000 -c 100 -v 1 -i http://`docker-compose port --protocol=tcp --index=1 haproxy-production-blue 8080`/

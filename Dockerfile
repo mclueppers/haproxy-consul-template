@@ -28,7 +28,7 @@ RUN apk --no-cache --update add $DEPS \
     && unzip /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
     && mv consul-template /usr/local/bin/ \
     && rm -rf /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
-    && apk del curl wget unzip
+    && apk del wget unzip
 
 EXPOSE 80 8080 1275 1936
 
