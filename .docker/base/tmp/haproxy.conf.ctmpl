@@ -1,8 +1,8 @@
 {{ $service_name      := (or (env "SERVICE_NAME") "haproxy")}}
 {{ $service_env       := (or (env "SERVICE_ENV") "production")}}
 {{ $service_path      := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
-{{ $active_slice      := (printf "%s/colors/active" $service_path | key)}}
-{{ $inactive_slice    := (printf "%s/colors/inactive" $service_path | key)}}
+{{ $active_slice      := (printf "%s/colours/active" $service_path | key)}}
+{{ $inactive_slice    := (printf "%s/colours/inactive" $service_path | key)}}
 {{ $bk_service        := (printf "%s" (or (env "BK_SERVICE_NAME") "hello-world"))}}
 {{ $bk_service_env    := (printf "%s" (or (env "BK_SERVICE_ENV") "production"))}}
 {{ $bk_service_check  := (printf "%s" (or (env "BK_SERVICE_CHECK") "/"))}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.haproxy-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}

@@ -15,12 +15,12 @@
 		"value": "MQ=="
 	},
 	{
-		"key": "service/haproxy/production/colors/active",
+		"key": "service/haproxy/production/colours/active",
 		"flags": 0,
 		"value": "Ymx1ZQ=="
 	},
 	{
-		"key": "service/haproxy/production/colors/inactive",
+		"key": "service/haproxy/production/colours/inactive",
 		"flags": 0,
 		"value": "Z3JlZW4="
 	},
@@ -95,12 +95,12 @@
 		"value": "MQ=="
 	},
 	{
-		"key": "service/haproxy/staging/colors/active",
+		"key": "service/haproxy/staging/colours/active",
 		"flags": 0,
 		"value": "Ymx1ZQ=="
 	},
 	{
-		"key": "service/haproxy/staging/colors/inactive",
+		"key": "service/haproxy/staging/colours/inactive",
 		"flags": 0,
 		"value": "Z3JlZW4="
 	},
