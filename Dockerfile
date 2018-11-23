@@ -18,6 +18,7 @@ ENV DEPS="curl \
         ca-certificates \
         haproxy \
         nginx \
+        nginx-mod-http-headers-more \
         runit \
         unzip \
         wget"

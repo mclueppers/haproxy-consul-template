@@ -18,5 +18,11 @@ session_start();
 <body>
 	<h1><?php echo "Hello ".(getenv("SERVICE_NAME") ? getenv("SERVICE_NAME") : "world")."!"; ?></h1>
 	<h3>My hostname is <?php echo getenv("HOSTNAME"); ?></h3>
+	<h2>Received headers</h2>
+	<ul>
+<?php foreach (getallheaders() as $name => $value) {
+echo "\t\t<li>$name: $value</li>\n";
+} ?>
+	</ul>
 </body>
 </html>

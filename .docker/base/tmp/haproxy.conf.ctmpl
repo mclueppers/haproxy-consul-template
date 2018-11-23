@@ -13,6 +13,7 @@
 {{ $inactive_b_weight := (keyOrDefault (printf "%s/weights/inactive/b" $service_path) "100")}}
 {{ $session_cookie_id := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
 {{ $stats_credentials := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
+{{ $request_type_hdr  := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
 global
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2500"}}
 
@@ -28,11 +29,13 @@ peers {{printf "%s-peers" $service_name}}
 # Active slice
 frontend ft-http-in-active
     bind *:{{executeTemplate "getMainPort"}}
+    reqidel {{printf "%s" $request_type_hdr}}
     default_backend bk-http-in-active
 
 # Inactive slice
 frontend ft-http-in-inactive
     bind *:8080
+    reqidel {{printf "%s" $request_type_hdr}}
     default_backend bk-http-in-inactive
 
 # Define internal frontends for A/B testing inside the active slice
@@ -75,6 +78,7 @@ backend bk-http-in-active
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
+    reqadd {{printf "%s" $request_type_hdr}}:\ active
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
@@ -105,6 +109,7 @@ backend bk-http-in-inactive
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
+    reqadd {{printf "%s" $request_type_hdr}}:\ inactive
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
