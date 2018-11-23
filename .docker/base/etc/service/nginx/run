@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if test -n "${ENABLE_TRAFFIC_MIRRORING}"; then
+  case ${ENABLE_TRAFFIC_MIRRORING} in
+    true|TRUE|yes|YES|y|Y|1)
+      exec /usr/sbin/nginx -g "daemon off;" -c /etc/nginx/nginx-mirroring.conf
+      ;;
+    *)
+      sv stop nginx
+      ;;
+  esac
+else
+  sv stop nginx
+fi

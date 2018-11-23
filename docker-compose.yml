@@ -23,6 +23,7 @@ services:
     image: haproxy-consul-template:production
     environment:
       CONSUL_ADDR: 'consul:8500'
+      ENABLE_TRAFFIC_MIRRORING: 'yes'
       SERVICE_80_NAME: haproxy
       SERVICE_1275_NAME: 'haproxy-peers'
       SERVICE_TAGS: 'production,blue'

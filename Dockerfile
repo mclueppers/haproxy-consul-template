@@ -17,9 +17,10 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 ENV DEPS="curl \
         ca-certificates \
         haproxy \
+        nginx \
+        runit \
         unzip \
-        wget \
-        runit"
+        wget"
 
 RUN apk --no-cache --update add $DEPS \
     && wget -O /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
@@ -28,6 +29,9 @@ RUN apk --no-cache --update add $DEPS \
     && unzip /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
     && mv consul-template /usr/local/bin/ \
     && rm -rf /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
+    && mkdir -p /run/nginx \
+    && ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
     && apk del wget unzip
 
 EXPOSE 80 8080 1275 1936
