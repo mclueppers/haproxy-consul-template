@@ -5,4 +5,4 @@
 #  Copyright (C) 2018 opsgang, Martin Dobrev
 #
 
-haproxy -f /etc/haproxy/haproxy.conf -sf `pidof -s haproxy`
+haproxy -f /etc/haproxy/haproxy.conf -sf `pidof -s haproxy` || exit 0

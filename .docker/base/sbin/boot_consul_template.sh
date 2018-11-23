@@ -21,6 +21,7 @@ fi
 
 exec /usr/local/bin/consul-template \
   -consul-addr="$CONSUL_ADDR" \
+  -template="/tmp/nginx.env.ctmpl:/etc/nginx/nginx.env:/sbin/boot_nginx.sh" \
   -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:/sbin/boot_haproxy.sh" \
-  -wait=3s:11s \
+  -wait=3s:17s \
   -dedup

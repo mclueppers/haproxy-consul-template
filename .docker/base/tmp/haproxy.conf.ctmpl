@@ -1,3 +1,4 @@
+{{ define "getMainPort"}}{{ $service_name := (or (env "SERVICE_NAME") "haproxy")}}{{ $service_env := (or (env "SERVICE_ENV") "production")}}{{ $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}{{$em := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}{{if (eq $em "yes" "true" "1")}}81{{else}}80{{end}}{{end}}
 {{ $service_name      := (or (env "SERVICE_NAME") "haproxy")}}
 {{ $service_env       := (or (env "SERVICE_ENV") "production")}}
 {{ $service_path      := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
@@ -26,7 +27,7 @@ peers {{printf "%s-peers" $service_name}}
 # Define the primary public frontends
 # Active slice
 frontend ft-http-in-active
-    bind *:80
+    bind *:{{executeTemplate "getMainPort"}}
     default_backend bk-http-in-active
 
 # Inactive slice

@@ -1,6 +1,6 @@
-# haproxy-consul-template
+# httprouty
 
-A blue/green load-balancer with A/B capabilities for each slice
+A blue/green load-balancer with A/B capabilities for each slice. On top of it it is possible to mirror traffic from the active to the inactive slice.
 
 # How it works?
 
