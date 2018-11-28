@@ -1,12 +1,12 @@
-{{ define "getMainPort"}}{{ $service_name := (or (env "SERVICE_NAME") "haproxy")}}{{ $service_env := (or (env "SERVICE_ENV") "production")}}{{ $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}{{$em := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}{{if (eq $em "yes" "true" "1")}}81{{else}}80{{end}}{{end}}
-{{ $service_name      := (or (env "SERVICE_NAME") "haproxy")}}
+{{ define "getMainPort"}}{{ $service_name := (or (env "SERVICE_NAME") "httprouty")}}{{ $service_env := (or (env "SERVICE_ENV") "production")}}{{ $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}{{$em := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}{{if (eq $em "yes" "true" "1")}}81{{else}}80{{end}}{{end}}
+{{ $service_name      := (or (env "SERVICE_NAME") "httprouty")}}
 {{ $service_env       := (or (env "SERVICE_ENV") "production")}}
 {{ $service_path      := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
-{{ $active_slice      := (printf "%s/colours/active" $service_path | key)}}
-{{ $inactive_slice    := (printf "%s/colours/inactive" $service_path | key)}}
-{{ $bk_service        := (printf "%s" (or (env "BK_SERVICE_NAME") "hello-world"))}}
-{{ $bk_service_env    := (printf "%s" (or (env "BK_SERVICE_ENV") "production"))}}
-{{ $bk_service_check  := (printf "%s" (or (env "BK_SERVICE_CHECK") "/"))}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.haproxy-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
+{{ $active_slice      := (keyOrDefault (printf "%s/colours/active" $service_path) "active")}}
+{{ $inactive_slice    := (keyOrDefault (printf "%s/colours/inactive" $service_path) "inactive")}}
+{{ $bk_service        := (or (env "BK_SERVICE_NAME") "hello-world")}}
+{{ $bk_service_env    := (or (env "BK_SERVICE_ENV") "production")}}
+{{ $bk_service_check  := (or (env "BK_SERVICE_CHECK") "/")}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.httprouty-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
 {{ $active_a_weight   := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
 {{ $active_b_weight   := (keyOrDefault (printf "%s/weights/active/b" $service_path) "100")}}
 {{ $inactive_a_weight := (keyOrDefault (printf "%s/weights/inactive/a" $service_path) "100")}}
@@ -14,8 +14,9 @@
 {{ $session_cookie_id := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
 {{ $stats_credentials := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 {{ $request_type_hdr  := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
+{{ $maint_page_addr   := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
 global
-    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2500"}}
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
 
 defaults
     mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}{{range ls (printf "%s/timeouts" $service_path)}}
@@ -23,37 +24,51 @@ defaults
 
 peers {{printf "%s-peers" $service_name}}
     peer {{env "HOSTNAME"}} 127.0.0.1:1275{{range service (printf "%s-peers" $service_name)}}{{if (.Tags | contains $service_env) }}
-    peer {{.Node}}.{{.ID}} {{.Address}}:{{.Port}}{{end}}{{end}}
+    peer {{.ID}} {{.Address}}:{{.Port}}{{end}}{{end}}
 
 # Define the primary public frontends
 # Active slice
 frontend ft-http-in-active
     bind *:{{executeTemplate "getMainPort"}}
-    reqidel {{printf "%s" $request_type_hdr}}
+    reqidel {{$request_type_hdr}}
+    acl no_active_a_srv nbsrv(bk-http-in-active-a) eq 0
+    acl no_active_b_srv nbsrv(bk-http-in-active-b) eq 0
+    use_backend bk_maint_page if no_active_a_srv no_active_b_srv
     default_backend bk-http-in-active
 
 # Inactive slice
 frontend ft-http-in-inactive
     bind *:8080
-    reqidel {{printf "%s" $request_type_hdr}}
+    reqidel {{$request_type_hdr}}
+    acl no_inactive_a_srv nbsrv(bk-http-in-inactive-a) eq 0
+    acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
+    use_backend bk_maint_page if no_inactive_a_srv no_inactive_b_srv
     default_backend bk-http-in-inactive
 
 # Define internal frontends for A/B testing inside the active slice
 frontend ft-http-in-active-a
     bind 127.0.0.1:8000
+    acl no_active_a_srv nbsrv(bk-http-in-active-a) eq 0
+    use_backend bk_maint_page if no_active_a_srv
     default_backend bk-http-in-active-a
 
 frontend ft-http-in-active-b
     bind 127.0.0.1:8002
+    acl no_active_b_srv nbsrv(bk-http-in-active-b) eq 0
+    use_backend bk_maint_page if no_active_b_srv
     default_backend bk-http-in-active-b
 
 # Define internal frontends for A/B testing inside the inactive slice
 frontend ft-http-in-inactive-a
     bind 127.0.0.1:8001
+    acl no_inactive_a_srv nbsrv(bk-http-in-inactive-a) eq 0
+    use_backend bk_maint_page if no_inactive_a_srv
     default_backend bk-http-in-inactive-a
 
 frontend ft-http-in-inactive-b
     bind 127.0.0.1:8003
+    acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
+    use_backend bk_maint_page if no_inactive_b_srv
     default_backend bk-http-in-inactive-b
 
 listen stats
@@ -78,58 +93,65 @@ backend bk-http-in-active
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
-    reqadd {{printf "%s" $request_type_hdr}}:\ active
+    reqadd {{$request_type_hdr}}:\ active
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    server Active-a 127.0.0.1:8000 weight {{printf "%s" $active_a_weight}} check cookie aa
-    server Active-b 127.0.0.1:8002 weight {{printf "%s" $active_b_weight}} check cookie ab
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    server Active-a 127.0.0.1:8000 weight {{$active_a_weight}} check cookie aa
+    server Active-b 127.0.0.1:8002 weight {{$active_b_weight}} check cookie ab
 
 backend bk-http-in-active-a
     balance roundrobin
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    option http-server-close
+    default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
-    server bad_gateway_active_a 127.0.0.1:3000{{end}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 
 backend bk-http-in-active-b
     balance roundrobin
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    option http-server-close
+    default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
-    server bad_gateway_active_b 127.0.0.1:3000{{end}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 
 backend bk-http-in-inactive
-    cookie {{printf "%s" $session_cookie_id}} insert indirect nocache
+    cookie {{$session_cookie_id}} insert indirect nocache
     stick-table type string len 2 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}})
     balance roundrobin
     rspidel (Server|X-Powered-By)
-    reqadd {{printf "%s" $request_type_hdr}}:\ inactive
+    reqadd {{$request_type_hdr}}:\ inactive
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    server Inctive-a 127.0.0.1:8001 weight {{printf "%s" $inactive_a_weight}} check cookie ia
-    server Inctive-b 127.0.0.1:8003 weight {{printf "%s" $inactive_b_weight}} check cookie ib
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    server Inctive-a 127.0.0.1:8001 weight {{$inactive_a_weight}} check cookie ia
+    server Inctive-b 127.0.0.1:8003 weight {{$inactive_b_weight}} check cookie ib
 
 backend bk-http-in-inactive-a
     balance roundrobin
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    option httpclose
+    default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
-    server bad_gateway_inactive_a 127.0.0.1:3000{{end}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 
 backend bk-http-in-inactive-b
     balance roundrobin
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
+    option http-server-close
+    default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{else}}
-    server bad_gateway_inactive_b 127.0.0.1:3000{{end}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
+
+backend bk_maint_page
+    server maint_server {{$maint_page_addr}}

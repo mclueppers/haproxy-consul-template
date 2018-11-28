@@ -23,6 +23,7 @@ services:
     image: haproxy-consul-template:production
     environment:
       CONSUL_ADDR: 'consul:8500'
+      SERVICE_NAME: 'haproxy'
       SERVICE_80_NAME: haproxy
       SERVICE_1275_NAME: 'haproxy-peers'
       SERVICE_TAGS: 'production,blue'
@@ -54,6 +55,7 @@ services:
     environment:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_NAME: 'haproxy'
+      SERVICE_80_NAME: 'haproxy'
       SERVICE_ENV: 'staging'
       SERVICE_80_TAGS: 'staging,green'
       BK_SERVICE_ENV: staging
