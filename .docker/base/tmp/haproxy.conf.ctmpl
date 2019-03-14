@@ -1,11 +1,11 @@
 {{ define "getBindSocket"}}{{ $service_name := (or (env "SERVICE_NAME") "httprouty")}}{{ $service_env := (or (env "SERVICE_ENV") "production")}}{{ $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}{{$em := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}{{if (eq $em "yes" "true" "1")}}unix@/tmp/haproxy-nginx.sock user root group nginx mode 660{{else}}*:80{{end}}{{end}}
 {{ $service_name           := (or (env "SERVICE_NAME") "httprouty")}}
-{{ $service_env            := (or (env "SERVICE_ENV") "production")}}
+{{ $service_env            := (or (env "SERVICE_ENV") "development")}}
 {{ $service_path           := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
 {{ $active_slice           := (keyOrDefault (printf "%s/colours/active" $service_path) "active")}}
 {{ $inactive_slice         := (keyOrDefault (printf "%s/colours/inactive" $service_path) "inactive")}}
 {{ $bk_service             := (or (env "BK_SERVICE_NAME") "hello-world")}}
-{{ $bk_service_env         := (or (env "BK_SERVICE_ENV") "production")}}
+{{ $bk_service_env         := (or (env "BK_SERVICE_ENV") "development")}}
 {{ $bk_service_check       := (or (env "BK_SERVICE_CHECK") "/")}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.httprouty-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
 {{ $active_a_weight        := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
 {{ $active_b_weight        := (keyOrDefault (printf "%s/weights/active/b" $service_path) "100")}}
