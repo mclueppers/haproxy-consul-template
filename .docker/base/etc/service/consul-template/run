@@ -2,13 +2,19 @@
 #
 #  Script to start consul-template
 #
-#  Copyright (C) 2018 opsgang, Martin Dobrev
+#  Copyright (C) 2018-2019 opsgang, Martin Dobrev
 #
-
 source /env
 
-exec /usr/local/bin/consul-template \
-  -config /etc/consul-template/config.hcl \
+# Configuration
+CONSUL_CONFIG_PATH=${CONSUL_CONFIG_PATH:-/etc/consul-template/config.hcl}
+
+if ! test -f "${CONSUL_CONFIG_PATH}"; then
+  envtpl -o "${CONSUL_CONFIG_PATH}" /tmp/consul-template.config.hcl.j2
+fi
+
+exec /usr/bin/consul-template \
+  -config "${CONSUL_CONFIG_PATH}" \
   -consul-addr="$CONSUL_ADDR" \
   -template="/tmp/nginx.env.ctmpl:/etc/nginx/nginx.env:/sbin/boot_nginx.sh" \
   -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:/sbin/boot_haproxy.sh"

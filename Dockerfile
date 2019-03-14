@@ -1,10 +1,8 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 ARG BUILD_DATE=0000-00-00
 ARG VCS_REF=undef
 
-ENV CONSUL_TEMPlATE_VERSION=0.19.5
-ENV CONSUL_TEMPlATE_SHA256SUMS=e6b376701708b901b0548490e296739aedd1c19423c386eb0b01cfad152162af
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://gitlab.dobrev.eu/docker/haproxy-consul-template.git" \
       org.label-schema.vcs-ref=$VCS_REF \
@@ -13,27 +11,22 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="haproxy-consul-template" \
       org.label-schema.description="Docker image with HAproxy, consul-template and Alpine" \
       org.label-schema.url="https://gitlab.dobrev.eu/docker/haproxy-consul-template"
+ADD https://repos.dobrev.it/alpine/dobrevit.rsa.pub /etc/apk/keys/dobrevit.rsa.pub
 
 ENV DEPS="curl \
         ca-certificates \
+        consul-template \
         haproxy \
         nginx \
         nginx-mod-http-headers-more \
-        runit \
-        unzip \
-        wget"
+        py3-envtpl \
+        runit"
 
-RUN apk --no-cache --update add $DEPS \
-    && wget -O /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
-         https://releases.hashicorp.com/consul-template/${CONSUL_TEMPlATE_VERSION}/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
-    && echo "$CONSUL_TEMPlATE_SHA256SUMS  /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip" | sha256sum -c - \
-    && unzip /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
-    && mv consul-template /usr/local/bin/ \
-    && rm -rf /tmp/consul-template_${CONSUL_TEMPlATE_VERSION}_linux_amd64.zip \
+RUN echo "https://repos.dobrev.it/alpine/v3.9/" | tee -a /etc/apk/repositories \
+    && apk --no-cache --update add $DEPS \
     && mkdir -p /run/nginx \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log \
-    && apk del wget unzip
+    && ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 80 8080 1275 1936
 

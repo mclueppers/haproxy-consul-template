@@ -46,5 +46,5 @@ deduplicate {
 
   # This is the prefix to the path in Consul's KV store where de-duplication
   # templates will be pre-rendered and stored.
-  prefix = "consul-template/httprouty/dedup/"
+  prefix = "consul-template/{{ SERVICE_NAME | default("httprouty") }}/{{ SERVICE_ENV | default("development") }}/dedup/"
 }
