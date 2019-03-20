@@ -6,9 +6,9 @@ A blue/green load-balancer with A/B capabilities for each slice. On top of it it
 
 ## Moving parts
 
-* Alpine 3.8
+* Alpine 3.9
 * HAproxy 1.8.5
-* consul-template 0.19.5
+* consul-template 0.20.0
 
 ## Architecture
 
