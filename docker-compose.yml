@@ -24,6 +24,7 @@ services:
     environment:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_NAME: 'haproxy'
+      SERVICE_ENV: 'production'
       SERVICE_80_NAME: haproxy
       SERVICE_1275_NAME: 'haproxy-peers'
       SERVICE_TAGS: 'production,blue'
@@ -42,6 +43,7 @@ services:
     environment:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_NAME: 'haproxy'
+      SERVICE_ENV: 'production'
       SERVICE_80_TAGS: 'production,green'
       BK_SERVICE_ENV: production
       BK_SERVICE_NAME: hello-world
