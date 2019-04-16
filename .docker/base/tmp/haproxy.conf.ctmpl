@@ -16,6 +16,7 @@
 {{ $stats_credentials      := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 {{ $request_type_hdr       := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
 {{ $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
+{{ $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
 {{ $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
 global
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
@@ -37,8 +38,9 @@ frontend ft-http-in-active
     acl no_active_b_srv nbsrv(bk-http-in-active-b) eq 0
     use_backend bk_maint_page if no_active_a_srv no_active_b_srv{{else}}
     acl no_active_srv nbsrv(bk-http-in-active) eq 0
-    use_backend bk_maint_page if no_active_srv{{end}}
-    default_backend bk-http-in-active
+    use_backend bk_maint_page if no_active_srv{{end}}{{ if (eq $enable_maint_page "false" "no" "0")}}
+    default_backend bk-http-in-active{{else}}
+    default_backend bk_maint_page{{end}}
 
 # Inactive slice
 frontend ft-http-in-inactive
@@ -49,8 +51,9 @@ frontend ft-http-in-inactive
     acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
     use_backend bk_maint_page if no_inactive_a_srv no_inactive_b_srv{{else}}
     acl no_inactive_srv nbsrv(bk-http-in-inactive) eq 0
-    use_backend bk_maint_page if no_inactive_srv{{end}}
-    default_backend bk-http-in-inactive
+    use_backend bk_maint_page if no_inactive_srv{{end}}{{ if (eq $enable_maint_page "false" "no" "0")}}
+    default_backend bk-http-in-active{{else}}
+    default_backend bk_maint_page{{end}}
 
 {{ if (eq $disable_ab_split "false" "no" "0")}}# Define internal frontends for A/B testing inside the active slice
 frontend ft-http-in-active-a
@@ -175,4 +178,5 @@ backend bk-http-in-inactive-b
 {{end}}
 
 backend bk_maint_page
+    reqadd X-Maintenance:\ {{ if (eq $enable_maint_page "false" "no" "0")}}un{{end}}planned
     server maint_server {{$maint_page_addr}}
