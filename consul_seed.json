@@ -1,5 +1,125 @@
 [
 	{
+		"key": "service/haproxy-alb/production/checks/downinter",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
+		"key": "service/haproxy-alb/production/checks/fall",
+		"flags": 0,
+		"value": "Mw=="
+	},
+	{
+		"key": "service/haproxy-alb/production/checks/fastinter",
+		"flags": 0,
+		"value": "NTAw"
+	},
+	{
+		"key": "service/haproxy-alb/production/checks/inter",
+		"flags": 0,
+		"value": "M3M="
+	},
+	{
+		"key": "service/haproxy-alb/production/checks/rise",
+		"flags": 0,
+		"value": "MQ=="
+	},
+	{
+		"key": "service/haproxy-alb/production/colours/active",
+		"flags": 0,
+		"value": "Ymx1ZQ=="
+	},
+	{
+		"key": "service/haproxy-alb/production/colours/inactive",
+		"flags": 0,
+		"value": "Z3JlZW4="
+	},
+	{
+		"key": "service/haproxy-alb/production/disable_ab_split",
+		"flags": 0,
+		"value": "dHJ1ZQ=="
+	},
+	{
+		"key": "service/haproxy-alb/production/enable_maint_page",
+		"flags": 0,
+		"value": "ZmFsc2U="
+	},
+	{
+		"key": "service/haproxy-alb/production/maint_page_addr",
+		"flags": 0,
+		"value": "bWFpbnRlbmFuY2UtcGFnZQ=="
+	},
+	{
+		"key": "service/haproxy-alb/production/max-spread-checks",
+		"flags": 0,
+		"value": "MTAwMDA="
+	},
+	{
+		"key": "service/haproxy-alb/production/maxconn",
+		"flags": 0,
+		"value": "MTI1MDA="
+	},
+	{
+		"key": "service/haproxy-alb/production/mode",
+		"flags": 0,
+		"value": "aHR0cA=="
+	},
+	{
+		"key": "service/haproxy-alb/production/session_cookie_id",
+		"flags": 0,
+		"value": "U1JWSUQ="
+	},
+	{
+		"key": "service/haproxy-alb/production/spread-checks",
+		"flags": 0,
+		"value": "NQ=="
+	},
+	{
+		"key": "service/haproxy-alb/production/stats_credentials",
+		"flags": 0,
+		"value": "YWRtaW46cGFzc3dvcmQ="
+	},
+	{
+		"key": "service/haproxy-alb/production/timeouts/client",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
+		"key": "service/haproxy-alb/production/timeouts/connect",
+		"flags": 0,
+		"value": "MnM="
+	},
+	{
+		"key": "service/haproxy-alb/production/timeouts/queue",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
+		"key": "service/haproxy-alb/production/timeouts/server",
+		"flags": 0,
+		"value": "MTVz"
+	},
+	{
+		"key": "service/haproxy-alb/production/weights/active/a",
+		"flags": 0,
+		"value": "ODA="
+	},
+	{
+		"key": "service/haproxy-alb/production/weights/active/b",
+		"flags": 0,
+		"value": "MjA="
+	},
+	{
+		"key": "service/haproxy-alb/production/weights/inactive/a",
+		"flags": 0,
+		"value": "MjA="
+	},
+	{
+		"key": "service/haproxy-alb/production/weights/inactive/b",
+		"flags": 0,
+		"value": "ODA="
+	},
+	{
 		"key": "service/haproxy/production/checks/fall",
 		"flags": 0,
 		"value": "Mw=="
@@ -17,12 +137,17 @@
 	{
 		"key": "service/haproxy/production/colours/active",
 		"flags": 0,
-		"value": "Ymx1ZQ=="
+		"value": "Z3JlZW4="
 	},
 	{
 		"key": "service/haproxy/production/colours/inactive",
 		"flags": 0,
-		"value": "Z3JlZW4="
+		"value": "Ymx1ZQ=="
+	},
+	{
+		"key": "service/haproxy/production/maint_page_addr",
+		"flags": 0,
+		"value": "bWFpbnRlbmFuY2UtcGFnZTo4MA=="
 	},
 	{
 		"key": "service/haproxy/production/maxconn",
@@ -105,6 +230,11 @@
 		"value": "Z3JlZW4="
 	},
 	{
+		"key": "service/haproxy/staging/maint_page_addr",
+		"flags": 0,
+		"value": "bWFpbnRlbmFuY2UtcGFnZTo4MA=="
+	},
+	{
 		"key": "service/haproxy/staging/maxconn",
 		"flags": 0,
 		"value": "MTI1MDA="
@@ -118,6 +248,11 @@
 		"key": "service/haproxy/staging/session_cookie_id",
 		"flags": 0,
 		"value": "U0VSVkVSSUQ="
+	},
+	{
+		"key": "service/haproxy/staging/stats_credentials",
+		"flags": 0,
+		"value": "YWRtaW46cGFzc3dvcmQ="
 	},
 	{
 		"key": "service/haproxy/staging/timeouts/client",

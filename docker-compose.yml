@@ -37,6 +37,7 @@ services:
       - "8080"
     links:
       - consul
+      - maintenance-page
 
   haproxy-production-blue:
     image: haproxy-consul-template:production
@@ -56,6 +57,7 @@ services:
       - "8080"
     links:
       - consul
+      - maintenance-page
 
   haproxy-production-green:
     image: haproxy-consul-template:production
@@ -63,6 +65,8 @@ services:
       CONSUL_ADDR: 'consul:8500'
       SERVICE_NAME: 'haproxy'
       SERVICE_ENV: 'production'
+      SERVICE_80_NAME: haproxy
+      SERVICE_1275_NAME: 'haproxy-peers'
       SERVICE_80_TAGS: 'production,green'
       BK_SERVICE_ENV: production
       BK_SERVICE_NAME: hello-world
@@ -70,6 +74,7 @@ services:
       - consul
     links:
       - consul
+      - maintenance-page
 
   haproxy-staging:
     image: haproxy-consul-template:production
@@ -172,6 +177,19 @@ services:
       SERVICE_80_CHECK_INTERVAL: 10s
       SERVICE_80_CHECK_TIMEOUT: 2s
       SERVICE_80_TAGS: 'staging,green,a'
+    depends_on:
+      - consul
+    links:
+      - consul
+
+  maintenance-page:
+    image: opsgang/docker-hello-world-bgab:latest
+    environment:
+      SERVICE_NAME: 'maintenance-page'
+      SERVICE_80_NAME: 'maintenance-page'
+      SERVICE_80_CHECK_HTTP: /
+      SERVICE_80_CHECK_INTERVAL: 10s
+      SERVICE_80_CHECK_TIMEOUT: 2s
     depends_on:
       - consul
     links:

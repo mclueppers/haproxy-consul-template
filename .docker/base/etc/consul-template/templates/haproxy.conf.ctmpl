@@ -36,6 +36,7 @@ peers {{printf "%s-peers" $service_name}}
 # Define the primary public frontends
 # Active slice
 frontend ft-http-in-active
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     bind {{executeTemplate "getBindSocket"}}
     reqidel {{$request_type_hdr}}{{ if (eq $disable_ab_split "false" "no" "0")}}
     acl no_active_a_srv nbsrv(bk-http-in-active-a) eq 0
@@ -50,6 +51,7 @@ frontend ft-http-in-active
 frontend ft-http-in-inactive
     bind *:8080
     bind unix@/tmp/haproxy-nginx-inactive.sock user root group nginx mode 660
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     reqidel {{$request_type_hdr}}{{ if (eq $disable_ab_split "false" "no" "0")}}
     acl no_inactive_a_srv nbsrv(bk-http-in-inactive-a) eq 0
     acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
@@ -62,12 +64,14 @@ frontend ft-http-in-inactive
 {{ if (eq $disable_ab_split "false" "no" "0")}}# Define internal frontends for A/B testing inside the active slice
 frontend ft-http-in-active-a
     bind unix@/tmp/haproxy-active-a.sock user root group nginx mode 660
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     acl no_active_a_srv nbsrv(bk-http-in-active-a) eq 0
     use_backend bk_maint_page if no_active_a_srv
     default_backend bk-http-in-active-a
 
 frontend ft-http-in-active-b
     bind unix@/tmp/haproxy-active-b.sock user root group nginx mode 660
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     acl no_active_b_srv nbsrv(bk-http-in-active-b) eq 0
     use_backend bk_maint_page if no_active_b_srv
     default_backend bk-http-in-active-b
@@ -76,12 +80,14 @@ frontend ft-http-in-active-b
 {{ if (eq $disable_ab_split "false" "no" "0")}}# Define internal frontends for A/B testing inside the inactive slice
 frontend ft-http-in-inactive-a
     bind unix@/tmp/haproxy-inactive-a.sock user root group nginx mode 660
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     acl no_inactive_a_srv nbsrv(bk-http-in-inactive-a) eq 0
     use_backend bk_maint_page if no_inactive_a_srv
     default_backend bk-http-in-inactive-a
 
 frontend ft-http-in-inactive-b
     bind unix@/tmp/haproxy-inactive-b.sock user root group nginx mode 660
+    maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
     use_backend bk_maint_page if no_inactive_b_srv
     default_backend bk-http-in-inactive-b

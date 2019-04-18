@@ -1,8 +1,18 @@
 [
 	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/checks/downinter",
+		"flags": 0,
+		"value": "MzBz"
+	},
+	{
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/checks/fall",
 		"flags": 0,
 		"value": "Mw=="
+	},
+	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/checks/fastinter",
+		"flags": 0,
+		"value": "NTAw"
 	},
 	{
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/checks/inter",
@@ -25,6 +35,26 @@
 		"value": "Z3JlZW4="
 	},
 	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/disable_ab_split",
+		"flags": 0,
+		"value": "ZmFsc2U="
+	},
+	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/enable_maint_page",
+		"flags": 0,
+		"value": "ZmFsc2U="
+	},
+	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/maint_page_addr",
+		"flags": 0,
+		"value": "MTI3LjAuMC4xOjY1NTM0"
+	},
+	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/max-spread-checks",
+		"flags": 0,
+		"value": "MTAwMDA="
+	},
+	{
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/maxconn",
 		"flags": 0,
 		"value": "MTI1MDA="
@@ -40,6 +70,11 @@
 		"value": "U1JWSUQ="
 	},
 	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/spread-checks",
+		"flags": 0,
+		"value": "NQ=="
+	},
+	{
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/stats_credentials",
 		"flags": 0,
 		"value": "YWRtaW46cGFzc3dvcmQ="
@@ -53,6 +88,11 @@
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/timeouts/connect",
 		"flags": 0,
 		"value": "MnM="
+	},
+	{
+		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/timeouts/queue",
+		"flags": 0,
+		"value": "MzBz"
 	},
 	{
 		"key": "service/##SERVICE_NAME##/##SERVICE_ENV##/timeouts/server",
