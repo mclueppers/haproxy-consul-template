@@ -18,12 +18,16 @@
 {{ $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
 {{ $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
 {{ $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
+
 global
+    spread-checks {{keyOrDefault (printf "%s/spread-checks" $service_path) "5"}}
+    max-spread-checks {{keyOrDefault (printf "%s/max-spread-checks" $service_path) "15000"}}
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
 
 defaults
     mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}{{range ls (printf "%s/timeouts" $service_path)}}
-    timeout {{.Key}} {{.Value}}{{end}}
+    timeout {{.Key}} {{.Value}}{{end}}{{range ls (printf "%s/options" $service_path)}}
+    option {{.Key}} {{.Value}}{{end}}
 
 peers {{printf "%s-peers" $service_name}}
     peer {{env "HOSTNAME"}} 127.0.0.1:1275{{range service (printf "%s-peers" $service_name)}}{{if (.Tags | contains $service_env) }}
@@ -91,9 +95,13 @@ listen stats
     maxconn 10{{range ls (printf "%s/timeouts" $service_path)}}
     timeout {{.Key}} {{.Value}}{{end}}
 
+    # Redirect to the stats URL
+    acl is_root path /
+    redirect code 301 location /haproxy?stats if is_root
+
     stats enable
     stats hide-version
-    stats refresh 30s
+    stats refresh 5s
     stats show-node
     stats auth {{printf "%s" $stats_credentials}}
     stats uri  /haproxy?stats
