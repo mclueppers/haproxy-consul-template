@@ -21,5 +21,5 @@ fi
 
 exec /usr/local/bin/consul-template \
   -consul-addr="$CONSUL_ADDR" \
-  -template="/tmp/nginx.env.ctmpl:/etc/nginx/nginx.env:/sbin/boot_nginx.sh" \
-  -template="/tmp/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:/sbin/boot_haproxy.sh"
+  -template="/etc/consul-template/templates/nginx.env.ctmpl:/etc/nginx/nginx.env:/sbin/boot_nginx.sh" \
+  -template="/etc/consul-template/templates/haproxy.conf.ctmpl:/etc/haproxy/haproxy.conf:/sbin/boot_haproxy.sh"

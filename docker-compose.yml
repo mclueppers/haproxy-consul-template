@@ -18,8 +18,27 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock"
 
 
-  haproxy-production-blue:
+  haproxy-production:
     build: .
+    image: haproxy-consul-template:production
+    environment:
+      CONSUL_ADDR: 'consul:8500'
+      SERVICE_NAME: 'haproxy-alb'
+      SERVICE_ENV: 'production'
+      SERVICE_80_NAME: haproxy-alb
+      SERVICE_1275_NAME: 'haproxy-alb-peers'
+      SERVICE_TAGS: 'production'
+      BK_SERVICE_ENV: production
+      BK_SERVICE_NAME: haproxy
+    depends_on:
+      - consul
+    ports:
+      - "80"
+      - "8080"
+    links:
+      - consul
+
+  haproxy-production-blue:
     image: haproxy-consul-template:production
     environment:
       CONSUL_ADDR: 'consul:8500'
