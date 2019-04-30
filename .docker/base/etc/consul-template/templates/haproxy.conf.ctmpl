@@ -15,7 +15,7 @@
 {{ $session_cookie_options := (keyOrDefault (printf "%s/session_cookie_options" $service_path) "insert indirect nocache")}}
 {{ $stats_credentials      := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 {{ $request_type_hdr       := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
-{{ $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}}}
+{{ $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}
 {{ $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
 {{ $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
 {{ $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
