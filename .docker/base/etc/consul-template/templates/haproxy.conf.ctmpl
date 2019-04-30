@@ -15,6 +15,7 @@
 {{ $session_cookie_options := (keyOrDefault (printf "%s/session_cookie_options" $service_path) "insert indirect nocache")}}
 {{ $stats_credentials      := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
 {{ $request_type_hdr       := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
+{{ $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}}}
 {{ $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
 {{ $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
 {{ $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
@@ -123,22 +124,23 @@ backend bk-http-in-active{{ if (eq $disable_ab_split "false" "no" "0")}}
     cookie {{$session_cookie_id}} {{$session_cookie_options}}
     stick-table type string len 43 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}}){{end}}
-    balance roundrobin
     rspidel (Server|X-Powered-By)
     reqadd {{$request_type_hdr}}:\ active
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
 {{ if (eq $disable_ab_split "false" "no" "0")}}
+    balance roundrobin
     server Active-a unix@/tmp/haproxy-active-a.sock weight {{$active_a_weight}} check cookie aa
     server Active-b unix@/tmp/haproxy-active-b.sock weight {{$active_b_weight}} check cookie ab
-{{else}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
+{{else}}
+    balance {{printf "%s" $balance_method}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 {{end}}
 
 {{ if (eq $disable_ab_split "false" "no" "0")}}
 backend bk-http-in-active-a
-    balance roundrobin
+    balance {{printf "%s" $balance_method}}
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
@@ -148,7 +150,7 @@ backend bk-http-in-active-a
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 
 backend bk-http-in-active-b
-    balance roundrobin
+    balance {{printf "%s" $balance_method}}
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
@@ -162,22 +164,23 @@ backend bk-http-in-inactive{{ if (eq $disable_ab_split "false" "no" "0")}}
     cookie {{$session_cookie_id}} {{$session_cookie_options}}
     stick-table type string len 43 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
     stick on cookie({{printf "%s" $session_cookie_id}}){{end}}
-    balance roundrobin
     rspidel (Server|X-Powered-By)
     reqadd {{$request_type_hdr}}:\ inactive
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
 {{ if (eq $disable_ab_split "false" "no" "0")}}
+    balance roundrobin
     server Inctive-a unix@/tmp/haproxy-inactive-a.sock weight {{$inactive_a_weight}} check cookie ia
     server Inctive-b unix@/tmp/haproxy-inactive-b.sock weight {{$inactive_b_weight}} check cookie ib
-{{else}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice)}}
+{{else}}
+    balance {{printf "%s" $balance_method}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice)}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 {{end}}
 
 {{ if (eq $disable_ab_split "false" "no" "0")}}
 backend bk-http-in-inactive-a
-    balance roundrobin
+    balance {{printf "%s" $balance_method}}
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
@@ -187,7 +190,7 @@ backend bk-http-in-inactive-a
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
 
 backend bk-http-in-inactive-b
-    balance roundrobin
+    balance {{printf "%s" $balance_method}}
     retries 10
     option redispatch
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
