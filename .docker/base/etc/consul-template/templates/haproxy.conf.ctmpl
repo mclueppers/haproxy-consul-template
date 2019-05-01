@@ -1,24 +1,32 @@
-{{ define "getBindSocket"}}{{ $service_name := (or (env "SERVICE_NAME") "httprouty")}}{{ $service_env := (or (env "SERVICE_ENV") "production")}}{{ $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}{{$em := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}{{if (eq $em "yes" "true" "1")}}unix@/tmp/haproxy-nginx.sock user root group nginx mode 660{{else}}*:80{{end}}{{end}}
-{{ $service_name           := (or (env "SERVICE_NAME") "httprouty")}}
-{{ $service_env            := (or (env "SERVICE_ENV") "development")}}
-{{ $service_path           := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
-{{ $active_slice           := (keyOrDefault (printf "%s/colours/active" $service_path) "active")}}
-{{ $inactive_slice         := (keyOrDefault (printf "%s/colours/inactive" $service_path) "inactive")}}
-{{ $bk_service             := (or (env "BK_SERVICE_NAME") "hello-world")}}
-{{ $bk_service_env         := (or (env "BK_SERVICE_ENV") "development")}}
-{{ $bk_service_check       := (or (env "BK_SERVICE_CHECK") "/")}}{{ $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.httprouty-healthcheck.invalid" $bk_service_check $service_name)}}{{ $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
-{{ $active_a_weight        := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
-{{ $active_b_weight        := (keyOrDefault (printf "%s/weights/active/b" $service_path) "100")}}
-{{ $inactive_a_weight      := (keyOrDefault (printf "%s/weights/inactive/a" $service_path) "100")}}
-{{ $inactive_b_weight      := (keyOrDefault (printf "%s/weights/inactive/b" $service_path) "100")}}
-{{ $session_cookie_id      := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
-{{ $session_cookie_options := (keyOrDefault (printf "%s/session_cookie_options" $service_path) "insert indirect nocache")}}
-{{ $stats_credentials      := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
-{{ $request_type_hdr       := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
-{{ $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}
-{{ $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
-{{ $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
-{{ $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
+{{- define "getBindSocket"}}
+  {{- $service_name := (or (env "SERVICE_NAME") "httprouty")}}
+  {{- $service_env  := (or (env "SERVICE_ENV") "development")}}
+  {{- $service_path := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
+  {{- $em           := (keyOrDefault (printf "%s/enable_traffic_mirroring" $service_path) "no")}}
+  {{- if (eq $em "yes" "true" "1")}}unix@/tmp/haproxy-nginx.sock user root group nginx mode 660{{- else}}*:80{{end}}
+{{- end}}
+{{- $service_name           := (or (env "SERVICE_NAME") "httprouty")}}
+{{- $service_env            := (or (env "SERVICE_ENV") "development")}}
+{{- $service_path           := (or (env "SERVICE_PATH") (printf "service/%s/%s" $service_name $service_env))}}
+{{- $active_slice           := (keyOrDefault (printf "%s/colours/active" $service_path) "active")}}
+{{- $inactive_slice         := (keyOrDefault (printf "%s/colours/inactive" $service_path) "inactive")}}
+{{- $bk_service             := (or (env "BK_SERVICE_NAME") "hello-world")}}
+{{- $bk_service_env         := (or (env "BK_SERVICE_ENV") "development")}}
+{{- $bk_service_check       := (or (env "BK_SERVICE_CHECK") "/")}}
+{{- $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.httprouty-healthcheck.invalid" $bk_service_check $service_name)}}
+{{- $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
+{{- $active_a_weight        := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
+{{- $active_b_weight        := (keyOrDefault (printf "%s/weights/active/b" $service_path) "100")}}
+{{- $inactive_a_weight      := (keyOrDefault (printf "%s/weights/inactive/a" $service_path) "100")}}
+{{- $inactive_b_weight      := (keyOrDefault (printf "%s/weights/inactive/b" $service_path) "100")}}
+{{- $session_cookie_id      := (keyOrDefault (printf "%s/session_cookie_id" $service_path) "JSESSIONID")}}
+{{- $session_cookie_options := (keyOrDefault (printf "%s/session_cookie_options" $service_path) "insert indirect nocache")}}
+{{- $stats_credentials      := (keyOrDefault (printf "%s/stats_credentials" $service_path) "admin:password")}}
+{{- $request_type_hdr       := (keyOrDefault (printf "%s/request_type_hdr" $service_path) "X-Request-Type")}}
+{{- $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}
+{{- $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
+{{- $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
+{{- $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
 
 global
     spread-checks {{keyOrDefault (printf "%s/spread-checks" $service_path) "5"}}
@@ -26,45 +34,95 @@ global
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
 
 defaults
-    mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}{{range ls (printf "%s/timeouts" $service_path)}}
-    timeout {{.Key}} {{.Value}}{{end}}{{range ls (printf "%s/options" $service_path)}}
-    option {{.Key}} {{.Value}}{{end}}
+    mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}
+    errorfile 503 /etc/haproxy/pages/error-page-503.http
+    errorfile 504 /etc/haproxy/pages/error-page-504.http
+{{- range ls (printf "%s/timeouts" $service_path)}}
+    timeout {{.Key}} {{.Value}}
+{{- end}}
+{{- range ls (printf "%s/options" $service_path)}}
+    option {{.Key}} {{.Value}}
+{{- end}}
 
 peers {{printf "%s-peers" $service_name}}
-    peer {{env "HOSTNAME"}} 127.0.0.1:1275{{range service (printf "%s-peers" $service_name)}}{{if (.Tags | contains $service_env) }}
-    peer {{.ID}} {{.Address}}:{{.Port}}{{end}}{{end}}
+    peer {{env "HOSTNAME"}} 127.0.0.1:1275
+{{- range service (printf "%s-peers" $service_name)}}
+  {{- if (.Tags | contains $service_env) }}
+    peer {{.ID}} {{.Address}}:{{.Port}}
+  {{- end}}
+{{- end}}
 
 # Define the primary public frontends
 # Active slice
 frontend ft-http-in-active
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
     bind {{executeTemplate "getBindSocket"}}
+
+    # Strip off Proxy headers to prevent HTTpoxy (https://httpoxy.org/)
+    reqidel Proxy
+
+    # Strip off {{$request_type_hdr}} headers to prevent clients from exploiting
+    # active/inactive slice processing logic
+    reqidel {{$request_type_hdr}}
+
+    # Health check monitoring uri.
+    monitor-uri /_____internal/healthz
+
+    # ACL settings
     acl stopping stopping eq true
-    reqidel {{$request_type_hdr}}{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     acl no_active_a_srv nbsrv(bk-http-in-active-a) eq 0
     acl no_active_b_srv nbsrv(bk-http-in-active-b) eq 0
-    use_backend bk_maint_page if no_active_a_srv no_active_b_srv !stopping{{else}}
+    monitor fail if no_active_a_srv no_active_b_srv !stopping
+    use_backend bk_maint_page if no_active_a_srv no_active_b_srv !stopping
+{{- else}}
     acl no_active_srv nbsrv(bk-http-in-active) eq 0
-    use_backend bk_maint_page if no_active_srv !stopping{{end}}{{ if (eq $enable_maint_page "false" "no" "0")}}
-    default_backend bk-http-in-active{{else}}
-    default_backend bk_maint_page{{end}}
+    monitor fail if no_active_srv !stopping
+    use_backend bk_maint_page if no_active_srv !stopping
+{{- end}}
+{{- if (eq $enable_maint_page "false" "no" "0")}}
+    default_backend bk-http-in-active
+{{- else}}
+    default_backend bk_maint_page
+{{- end}}
 
 # Inactive slice
 frontend ft-http-in-inactive
     bind *:8080
     bind unix@/tmp/haproxy-nginx-inactive.sock user root group nginx mode 660
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
+
+    # Strip off Proxy headers to prevent HTTpoxy (https://httpoxy.org/)
+    reqidel Proxy
+
+    # Strip off {{$request_type_hdr}} headers to prevent clients from exploiting
+    # active/inactive slice processing logic
+    reqidel {{$request_type_hdr}}
+
+    # Health check monitoring uri.
+    monitor-uri /_____internal/healthz
+
+    # ACL settings
     acl stopping stopping eq true
-    reqidel {{$request_type_hdr}}{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     acl no_inactive_a_srv nbsrv(bk-http-in-inactive-a) eq 0
     acl no_inactive_b_srv nbsrv(bk-http-in-inactive-b) eq 0
-    use_backend bk_maint_page if no_inactive_a_srv no_inactive_b_srv !stopping{{else}}
+    monitor fail if no_inactive_a_srv no_inactive_b_srv !stopping
+    use_backend bk_maint_page if no_inactive_a_srv no_inactive_b_srv !stopping
+{{- else}}
     acl no_inactive_srv nbsrv(bk-http-in-inactive) eq 0
-    use_backend bk_maint_page if no_inactive_srv !stopping{{end}}{{ if (eq $enable_maint_page "false" "no" "0")}}
-    default_backend bk-http-in-active{{else}}
-    default_backend bk_maint_page{{end}}
+    monitor fail if no_inactive_srv !stopping
+    use_backend bk_maint_page if no_inactive_srv !stopping
+{{- end}}
+{{- if (eq $enable_maint_page "false" "no" "0")}}
+    default_backend bk-http-in-active
+{{- else}}
+    default_backend bk_maint_page
+{{- end}}
 
-{{ if (eq $disable_ab_split "false" "no" "0")}}# Define internal frontends for A/B testing inside the active slice
+
+{{- if (eq $disable_ab_split "false" "no" "0")}}
+# Define internal frontends for A/B testing inside the active slice
 frontend ft-http-in-active-a
     bind unix@/tmp/haproxy-active-a.sock user root group nginx mode 660
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
@@ -80,9 +138,11 @@ frontend ft-http-in-active-b
     acl stopping stopping eq true
     use_backend bk_maint_page if no_active_b_srv !stopping
     default_backend bk-http-in-active-b
-{{end}}
+{{- end}}
 
-{{ if (eq $disable_ab_split "false" "no" "0")}}# Define internal frontends for A/B testing inside the inactive slice
+
+{{- if (eq $disable_ab_split "false" "no" "0")}}
+# Define internal frontends for A/B testing inside the inactive slice
 frontend ft-http-in-inactive-a
     bind unix@/tmp/haproxy-inactive-a.sock user root group nginx mode 660
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
@@ -98,47 +158,55 @@ frontend ft-http-in-inactive-b
     acl stopping stopping eq true
     use_backend bk_maint_page if no_inactive_b_srv !stopping
     default_backend bk-http-in-inactive-b
-{{end}}
+{{- end}}
 
 listen stats
     bind *:1936
     mode http
     log  global
 
-    maxconn 10{{range ls (printf "%s/timeouts" $service_path)}}
-    timeout {{.Key}} {{.Value}}{{end}}
+    maxconn 10
+{{- range ls (printf "%s/timeouts" $service_path)}}
+    timeout {{.Key}} {{.Value}}
+{{- end}}
 
     # Redirect to the stats URL
     acl is_root path /
-    redirect code 301 location /haproxy?stats if is_root
+    redirect code 301 location /_____internal/stats if is_root
 
     stats enable
     stats hide-version
     stats refresh 5s
     stats show-node
     stats auth {{printf "%s" $stats_credentials}}
-    stats uri  /haproxy?stats
+    stats uri  /_____internal/stats
 
 # Define the backends
-backend bk-http-in-active{{ if (eq $disable_ab_split "false" "no" "0")}}
+backend bk-http-in-active
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     cookie {{$session_cookie_id}} {{$session_cookie_options}}
     stick-table type string len 43 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
-    stick on cookie({{printf "%s" $session_cookie_id}}){{end}}
+    stick on cookie({{printf "%s" $session_cookie_id}})
+{{- end}}
     rspidel (Server|X-Powered-By)
     reqadd {{$request_type_hdr}}:\ active
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
-{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     balance roundrobin
     server Active-a unix@/tmp/haproxy-active-a.sock weight {{$active_a_weight}} check cookie aa
     server Active-b unix@/tmp/haproxy-active-b.sock weight {{$active_b_weight}} check cookie ab
-{{else}}
-    balance {{printf "%s" $balance_method}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
-{{end}}
+{{- else}}
+    balance {{printf "%s" $balance_method}}
+{{- range service $bk_service}}
+  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
+{{- end}}
 
-{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
 backend bk-http-in-active-a
     balance {{printf "%s" $balance_method}}
     retries 10
@@ -146,8 +214,12 @@ backend bk-http-in-active-a
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+{{- range service $bk_service}}
+  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
 
 backend bk-http-in-active-b
     balance {{printf "%s" $balance_method}}
@@ -156,29 +228,39 @@ backend bk-http-in-active-b
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
-{{end}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+{{- range service $bk_service}}
+  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
+{{- end}}
 
-backend bk-http-in-inactive{{ if (eq $disable_ab_split "false" "no" "0")}}
+backend bk-http-in-inactive
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     cookie {{$session_cookie_id}} {{$session_cookie_options}}
     stick-table type string len 43 size 1M expire 4h peers {{printf "%s-peers" $service_name}}
-    stick on cookie({{printf "%s" $session_cookie_id}}){{end}}
+    stick on cookie({{printf "%s" $session_cookie_id}})
+{{- end}}
     rspidel (Server|X-Powered-By)
     reqadd {{$request_type_hdr}}:\ inactive
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
-{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
     balance roundrobin
     server Inctive-a unix@/tmp/haproxy-inactive-a.sock weight {{$inactive_a_weight}} check cookie ia
     server Inctive-b unix@/tmp/haproxy-inactive-b.sock weight {{$inactive_b_weight}} check cookie ib
-{{else}}
-    balance {{printf "%s" $balance_method}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice)}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
-{{end}}
+{{- else}}
+    balance {{printf "%s" $balance_method}}
+  {{- range service $bk_service}}
+    {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice)}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
+{{- end}}
 
-{{ if (eq $disable_ab_split "false" "no" "0")}}
+{{- if (eq $disable_ab_split "false" "no" "0")}}
 backend bk-http-in-inactive-a
     balance {{printf "%s" $balance_method}}
     retries 10
@@ -186,8 +268,12 @@ backend bk-http-in-inactive-a
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     option httpclose
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+{{- range service $bk_service}}
+  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
 
 backend bk-http-in-inactive-b
     balance {{printf "%s" $balance_method}}
@@ -196,9 +282,13 @@ backend bk-http-in-inactive-b
     option httpchk {{keyOrDefault (printf "%s/http_check" $service_path) $bk_service_check_default}}
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
-    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}{{range service $bk_service}}{{if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
-    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check{{end}}{{end}}
-{{end}}
+    http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+{{- range service $bk_service}}
+  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
+    server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
+  {{- end}}
+{{- end}}
+{{- end}}
 
 backend bk_maint_page
     reqadd X-Maintenance:\ {{ if (eq $enable_maint_page "false" "no" "0")}}un{{end}}planned
