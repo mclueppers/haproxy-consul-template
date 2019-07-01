@@ -26,14 +26,21 @@
 {{- $balance_method         := (keyOrDefault (printf "%s/balance_method" $service_path) "roundrobin")}}
 {{- $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
 {{- $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
+{{- $max_backend_slots      := (keyOrDefault (printf "%s/max_backend_slots" $service_path) "20")}}
 {{- $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
 
 global
     spread-checks {{keyOrDefault (printf "%s/spread-checks" $service_path) "5"}}
     max-spread-checks {{keyOrDefault (printf "%s/max-spread-checks" $service_path) "15000"}}
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
+    pidfile /run/haproxy/haproxy.pid
+    stats socket /run/haproxy/haproxy.sock mode 666 expose-fd listeners level admin
+    stats socket ipv4@0.0.0.0:1396 level admin
+    stats timeout 2m
+    server-state-file /run/haproxy/haproxy.state
 
 defaults
+    load-server-state-from-file global
     mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}
     errorfile 503 /etc/haproxy/pages/error-page-503.http
     errorfile 504 /etc/haproxy/pages/error-page-504.http
@@ -198,12 +205,13 @@ backend bk-http-in-active
     server Active-a unix@/tmp/haproxy-active-a.sock weight {{$active_a_weight}} check cookie aa
     server Active-b unix@/tmp/haproxy-active-b.sock weight {{$active_b_weight}} check cookie ab
 {{- else}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
     balance {{printf "%s" $balance_method}}
-{{- range service $bk_service}}
-  {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
+    {{- range service $bk_service}}
+      {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice)}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
-  {{- end}}
-{{- end}}
+      {{- end}}
+    {{- end}}
 {{- end}}
 
 {{- if (eq $disable_ab_split "false" "no" "0")}}
@@ -215,6 +223,7 @@ backend bk-http-in-active-a
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
 {{- range service $bk_service}}
   {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "a")}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
@@ -229,6 +238,7 @@ backend bk-http-in-active-b
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
 {{- range service $bk_service}}
   {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $active_slice) (.Tags | contains "b")}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
@@ -252,6 +262,7 @@ backend bk-http-in-inactive
     server Inctive-a unix@/tmp/haproxy-inactive-a.sock weight {{$inactive_a_weight}} check cookie ia
     server Inctive-b unix@/tmp/haproxy-inactive-b.sock weight {{$inactive_b_weight}} check cookie ib
 {{- else}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
     balance {{printf "%s" $balance_method}}
   {{- range service $bk_service}}
     {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice)}}
@@ -269,6 +280,7 @@ backend bk-http-in-inactive-a
     option httpclose
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
 {{- range service $bk_service}}
   {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "a")}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check
@@ -283,6 +295,7 @@ backend bk-http-in-inactive-b
     option http-server-close
     default-server {{range ls (printf "%s/checks" $service_path)}}{{.Key}} {{.Value}} {{end}}
     http-check expect {{keyOrDefault (printf "%s/http_check_expect" $service_path) $bk_service_check_expect_default}}
+    #server-template websrv 1-{{$max_backend_slots}} 127.0.0.1:65535 check disabled
 {{- range service $bk_service}}
   {{- if and (.Tags | contains $bk_service_env) (.Tags | contains $inactive_slice) (.Tags | contains "b")}}
     server {{.Node}}.{{.ID}} {{.Address}}:{{.Port}} check

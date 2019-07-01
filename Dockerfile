@@ -17,6 +17,7 @@ ENV DEPS="curl \
         ca-certificates \
         consul-template \
         haproxy \
+        netcat-openbsd \
         nginx \
         nginx-mod-http-headers-more \
         py3-envtpl \
@@ -24,7 +25,7 @@ ENV DEPS="curl \
 
 RUN echo "https://repos.dobrev.it/alpine/v3.9/" | tee -a /etc/apk/repositories \
     && apk --no-cache --update add $DEPS \
-    && mkdir -p /run/nginx \
+    && mkdir -p /run/nginx /run/haproxy \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
