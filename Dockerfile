@@ -29,7 +29,7 @@ RUN echo "https://repos.dobrev.it/alpine/v3.9/" | tee -a /etc/apk/repositories \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
-EXPOSE 80 8080 1275 1936
+EXPOSE 80 8080 1275 1396 1936
 
 COPY ./.docker/base /
 

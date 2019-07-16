@@ -16,7 +16,7 @@ if [[ -f /run/haproxy/haproxy.pid ]]; then
   local old_pid=$(cat /run/haproxy/haproxy.pid)
   HAPROXY_OPTS="${HAPROXY_OPTS} -sf ${old_pid}"
 else
-  pidof haproxy && HAPROXY_OPTS="${HAPROXY_OPTS} -sf $(pidof haproxy)"
+  pidof haproxy > /dev/null && HAPROXY_OPTS="${HAPROXY_OPTS} -sf $(pidof haproxy)"
 fi
 
 echo "HA-Proxy started with the following options: ${HAPROXY_OPTS}"

@@ -13,6 +13,7 @@
 {{- $bk_service             := (or (env "BK_SERVICE_NAME") "hello-world")}}
 {{- $bk_service_env         := (or (env "BK_SERVICE_ENV") "development")}}
 {{- $bk_service_check       := (or (env "BK_SERVICE_CHECK") "/")}}
+{{- $logstash_service_host  := (or (env "LOGSTASH_SERVICE_HOST") "undefined")}}
 {{- $bk_service_check_default := (printf "HEAD %s HTTP/1.1\\r\\nHost:\\ %s.httprouty-healthcheck.invalid" $bk_service_check $service_name)}}
 {{- $bk_service_check_expect_default := "rstatus (2|3|4)[0-9][0-9]"}}
 {{- $active_a_weight        := (keyOrDefault (printf "%s/weights/active/a" $service_path) "100")}}
@@ -27,9 +28,14 @@
 {{- $disable_ab_split       := (keyOrDefault (printf "%s/disable_ab_split" $service_path) "false")}}
 {{- $enable_maint_page      := (keyOrDefault (printf "%s/enable_maint_page" $service_path) "false")}}
 {{- $max_backend_slots      := (keyOrDefault (printf "%s/max_backend_slots" $service_path) "20")}}
+{{- $enable_compression     := (keyOrDefault (printf "%s/enable_compression" $service_path) "false")}}
 {{- $maint_page_addr        := (keyOrDefault (printf "%s/maint_page_addr" $service_path) "127.0.0.1:65535")}}
 
 global
+{{- if (ne $logstash_service_host "undefined")}}
+    log {{ $logstash_service_host }}:5140 len 4096 local0
+    log {{ $logstash_service_host }}:5140 len 4096 local1 notice
+{{- end}}
     spread-checks {{keyOrDefault (printf "%s/spread-checks" $service_path) "5"}}
     max-spread-checks {{keyOrDefault (printf "%s/max-spread-checks" $service_path) "15000"}}
     maxconn {{keyOrDefault (printf "%s/maxconn" $service_path) "2000"}}
@@ -42,14 +48,22 @@ global
 defaults
     load-server-state-from-file global
     mode {{keyOrDefault (printf "%s/mode" $service_path) "http"}}
+
     errorfile 503 /etc/haproxy/pages/error-page-503.http
     errorfile 504 /etc/haproxy/pages/error-page-504.http
+
+{{- if (eq $enable_compression "yes" "true" "1")}}
+    compression algo gzip
+    compression type text/html text/html;charset=utf-8 text/plain text/css text/javascript application/javascript application/x-javascript text/xml application/json application/xml font/truetype application/x-font-ttf
+{{- end}}
+
 {{- range ls (printf "%s/timeouts" $service_path)}}
     timeout {{.Key}} {{.Value}}
 {{- end}}
 {{- range ls (printf "%s/options" $service_path)}}
     option {{.Key}} {{.Value}}
 {{- end}}
+    retries 3
 
 peers {{printf "%s-peers" $service_name}}
     peer {{env "HOSTNAME"}} 127.0.0.1:1275
@@ -74,6 +88,19 @@ frontend ft-http-in-active
 
     # Health check monitoring uri.
     monitor-uri /_____internal/healthz
+
+    # DO NOT CHANGE THESE UNLESS CHANGING LOGSTASH CONFIG
+    capture request header Host len 64
+    capture request header X-Forwarded-For len 64
+    capture request header Accept-Language len 64
+    capture request header Referer len 64
+    capture request header User-Agent len 128
+    capture request header CF-IPCountry len 64
+    capture request header CF-Connecting-IP len 64
+    capture request header CF-RAY len 64
+    capture request header Content-Length len 10
+    capture request header X-Haproxy-ACL len 256
+    capture request header X-Haproxy-TARPIT len 256
 
     # ACL settings
     acl stopping stopping eq true
@@ -167,7 +194,21 @@ frontend ft-http-in-inactive-b
     default_backend bk-http-in-inactive-b
 {{- end}}
 
+userlist stats-auth
+    group admin    users {{range ls (printf "%s/credentials/admin" $service_path)}} {{.Key}}{{end}}
+{{- range ls (printf "%s/credentials/admin" $service_path)}}
+    user {{.Key}}  insecure-password {{.Value}}
+{{- end}}
+
+    group readonly users {{range ls (printf "%s/credentials/user" $service_path)}} {{.Key}}{{end}}
+{{- range ls (printf "%s/credentials/user" $service_path)}}
+    user {{.Key}}  insecure-password {{.Value}}
+{{- end}}
+
 listen stats
+    acl AUTH http_auth(stats-auth)
+    acl AUTH_ADMIN http_auth_group(stats-auth) admin
+
     bind *:1936
     mode http
     log  global
@@ -185,8 +226,10 @@ listen stats
     stats hide-version
     stats refresh 5s
     stats show-node
-    stats auth {{printf "%s" $stats_credentials}}
+    stats show-legends
     stats uri  /_____internal/stats
+    stats http-request auth unless AUTH
+    stats admin if AUTH_ADMIN
 
 # Define the backends
 backend bk-http-in-active
